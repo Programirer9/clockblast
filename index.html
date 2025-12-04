@@ -2,40 +2,56 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BlockBlast</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>BlockBlast — Enhanced</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main>
+  <header>
     <h1>BlockBlast</h1>
-    <div id="hud">
-      <div id="score">Score: 0</div>
-      <div id="lives">Lives: 3</div>
-      <div id="level">Level: 1</div>
+    <div id="topbar">
+      <div id="scoreBox">Score: <span id="score">0</span></div>
+      <div id="coinsBox">Münzen: <span id="coins">0</span></div>
+      <button id="shopBtn" class="iconBtn">Shop</button>
+      <button id="challengeBtn" class="iconBtn">Tägliche Challenge</button>
+      <button id="highscoreBtn" class="iconBtn">Highscores</button>
     </div>
+  </header>
 
-    <canvas id="gameCanvas" width="800" height="600" aria-label="BlockBlast Spiel"></canvas>
-
-    <div id="controls">
-      <button id="startBtn">Start / Restart</button>
-      <button id="pauseBtn">Pause</button>
-      <label for="volume">Sound</label>
-      <input id="volume" type="range" min="0" max="1" step="0.1" value="0.5" />
-      <span class="hint">Links/Rechts: ⬅️ ➡️  •  Taste P: Pause • Leertaste: Abprallen (Start)</span>
-    </div>
-
-    <div id="overlay" class="hidden">
-      <div id="overlayContent">
-        <h2 id="overlayTitle">BlockBlast</h2>
-        <p id="overlayMsg">Drücke Start</p>
-        <button id="overlayBtn">Weiter</button>
+  <main>
+    <section id="gameArea">
+      <div id="boardContainer">
+        <div id="board" aria-label="9x9 Spielbrett" role="grid"></div>
+        <div id="boardOverlay" class="hidden"></div>
       </div>
-    </div>
+
+      <aside id="rightPanel">
+        <h2>Blöcke</h2>
+        <div id="pieces" aria-live="polite"></div>
+
+        <div id="controls">
+          <button id="restartBtn" class="primary">Neustarten</button>
+          <button id="useJokerBtn">Joker benutzen</button>
+        </div>
+
+        <div id="smallHints">
+          <p>Tippe ein Block an → tippe Zelle zum Platzieren.</p>
+          <p>Auf Touch: lange drücken zum Drag.</p>
+        </div>
+      </aside>
+    </section>
   </main>
 
+  <!-- Modals -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modalContent">
+      <button class="closeModal" id="closeModal">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
   <footer>
-    <small>Made with ❤️ — pack es auf GitHub Pages: branch <code>main</code>, Settings → Pages → Deploy</small>
+    <small>Speicherung: localStorage — Tägliche Challenge basiert auf Datum.</small>
   </footer>
 
   <script src="game.js"></script>
