@@ -1,59 +1,37 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>BlockBlast — Enhanced</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockBlast Clone</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>BlockBlast</h1>
-    <div id="topbar">
-      <div id="scoreBox">Score: <span id="score">0</span></div>
-      <div id="coinsBox">Münzen: <span id="coins">0</span></div>
-      <button id="shopBtn" class="iconBtn">Shop</button>
-      <button id="challengeBtn" class="iconBtn">Tägliche Challenge</button>
-      <button id="highscoreBtn" class="iconBtn">Highscores</button>
+
+    <div id="topBar">
+        <div>Score: <span id="score">0</span></div>
+        <div>Highscore: <span id="highscore">0</span></div>
+        <div>Coins: <span id="coins">0</span></div>
     </div>
-  </header>
 
-  <main>
-    <section id="gameArea">
-      <div id="boardContainer">
-        <div id="board" aria-label="9x9 Spielbrett" role="grid"></div>
-        <div id="boardOverlay" class="hidden"></div>
-      </div>
+    <div id="board"></div>
 
-      <aside id="rightPanel">
-        <h2>Blöcke</h2>
-        <div id="pieces" aria-live="polite"></div>
+    <div id="pieces"></div>
 
-        <div id="controls">
-          <button id="restartBtn" class="primary">Neustarten</button>
-          <button id="useJokerBtn">Joker benutzen</button>
-        </div>
-
-        <div id="smallHints">
-          <p>Tippe ein Block an → tippe Zelle zum Platzieren.</p>
-          <p>Auf Touch: lange drücken zum Drag.</p>
-        </div>
-      </aside>
-    </section>
-  </main>
-
-  <!-- Modals -->
-  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modalContent">
-      <button class="closeModal" id="closeModal">✕</button>
-      <div id="modalBody"></div>
+    <div id="jokerBar">
+        <button class="jokerBtn" id="jokerNew">🔄 Neue Blöcke (20 Coins)</button>
+        <button class="jokerBtn" id="jokerBomb">💣 3×3 Bombe (50 Coins)</button>
     </div>
-  </div>
 
-  <footer>
-    <small>Speicherung: localStorage — Tägliche Challenge basiert auf Datum.</small>
-  </footer>
+    <div id="dailyChallenge">
+        🌟 Tages-Challenge:  
+        <span id="challengeGoal">Erreiche 500 Punkte</span>  
+        <br>
+        <span id="challengeStatus"></span>
+    </div>
 
-  <script src="game.js"></script>
+    <button id="restartBtn">Neu starten</button>
+
+    <script src="game.js"></script>
 </body>
 </html>
