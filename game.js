@@ -1,21 +1,35 @@
-//-------------------------------------------------
-// BlockBlast – Touch-Drag Version
-//-------------------------------------------------
+//------------------------------------------------------
+// BlockBlast – Vollversion mit Drag, Coins, Joker,
+// Highscore, größeren Blöcken & täglicher Challenge
+//------------------------------------------------------
 
 const boardEl = document.getElementById("board");
 const piecesEl = document.getElementById("pieces");
 const scoreEl = document.getElementById("score");
-const restartBtn = document.getElementById("restartBtn");
+const highscoreEl = document.getElementById("highscore");
+const coinsEl = document.getElementById("coins");
+const challengeStatus = document.getElementById("challengeStatus");
 
 let board = [];
 let score = 0;
 
-let draggedElement = null;
-let draggedShape = null;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
+let coins = parseInt(localStorage.getItem("coins") || "0");
+coinsEl.textContent = coins;
 
-// 9×9 Leeres Board
+let highscore = parseInt(localStorage.getItem("highscore") || "0");
+highscoreEl.textContent = highscore;
+
+// Tageschallenge
+let challengeGoal = 500;
+let challengeDoneToday = localStorage.getItem("challengeDone") === new Date().toDateString();
+
+if (challengeDoneToday) {
+    challengeStatus.textContent = "✔ Erledigt! +50 Coins";
+} else {
+    challengeStatus.textContent = "Nicht erledigt";
+}
+
+// Spielfeld aufbauen
 function initBoard() {
   board = Array(9).fill().map(() => Array(9).fill(0));
   renderBoard();
@@ -36,18 +50,52 @@ function renderBoard() {
   });
 }
 
-// BlockShapes
+// ---- BLOCK-FORMEN ----
 const SHAPES = [
   [[1]],
+
+  // Normale
   [[1,1]], [[1,1,1]], [[1],[1],[1]],
   [[1,1],[1,1]],
   [[1,0],[1,1]],
   [[0,1],[1,1]],
   [[1,1,1],[0,1,0]],
-  [[1,1,0],[0,1,1]]
+  [[1,1,0],[0,1,1]],
+
+  // Große Blöcke
+  [[1,1,1,1]],
+  [[1],[1],[1],[1]],
+  [[1,1,1,1,1]],
+  [[1],[1],[1],[1],[1]],
+
+  // big L
+  [[1,0,0],
+   [1,0,0],
+   [1,1,1]],
+
+  // big T
+  [[1,1,1],
+   [0,1,0],
+   [0,1,0]],
+
+  // big Z
+  [[1,1,0],
+   [0,1,1],
+   [0,0,1]],
+
+  // 3x4 Block
+  [[1,1,1,1],
+   [1,0,0,1],
+   [1,1,1,1]],
+
+  // 4x4 Block
+  [[1,1,1,1],
+   [1,0,0,1],
+   [1,0,0,1],
+   [1,1,1,1]]
 ];
 
-// Stücke erstellen
+// ---- BLÖCKE ERZEUGEN ----
 function generatePieces() {
   piecesEl.innerHTML = "";
 
@@ -60,7 +108,6 @@ function generatePieces() {
 function renderPiece(shape) {
   const container = document.createElement("div");
   container.classList.add("piece");
-  container.style.position = "relative";
   container.style.gridTemplateColumns = `repeat(${shape[0].length}, 28px)`;
 
   shape.forEach(row => {
@@ -73,14 +120,19 @@ function renderPiece(shape) {
 
   container.shape = shape;
 
-  // EVENT: TOUCH & MOUSE
+  // Drag
   container.addEventListener("mousedown", dragStart);
   container.addEventListener("touchstart", dragStart, { passive: false });
 
   piecesEl.appendChild(container);
 }
 
-// ---------------- DRAGGING ----------------
+// ---- DRAG-&-DROP ----
+let draggedElement = null;
+let draggedShape = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let isDragging = false;
 
 function dragStart(e) {
   e.preventDefault();
@@ -89,7 +141,6 @@ function dragStart(e) {
   draggedShape = draggedElement.shape;
 
   const rect = draggedElement.getBoundingClientRect();
-
   const touch = e.touches ? e.touches[0] : e;
 
   dragOffsetX = touch.clientX - rect.left;
@@ -99,16 +150,17 @@ function dragStart(e) {
   draggedElement.style.zIndex = 999;
   draggedElement.style.pointerEvents = "none";
 
+  isDragging = true;
+
   document.addEventListener("mousemove", dragMove);
   document.addEventListener("mouseup", dragEnd);
-
   document.addEventListener("touchmove", dragMove, { passive: false });
   document.addEventListener("touchend", dragEnd);
 }
 
 function dragMove(e) {
+  if (!isDragging) return;
   e.preventDefault();
-  if (!draggedElement) return;
 
   const touch = e.touches ? e.touches[0] : e;
 
@@ -119,34 +171,55 @@ function dragMove(e) {
 }
 
 function dragEnd(e) {
-  if (!draggedElement) return;
+  if (!isDragging) return;
 
   const touch = e.changedTouches ? e.changedTouches[0] : e;
 
-  const placed = tryPlaceAt(touch.clientX, touch.clientY);
-
-  if (!placed) {
-    // zurücksetzen
+  if (!tryPlaceAt(touch.clientX, touch.clientY)) {
     draggedElement.style.left = "0px";
     draggedElement.style.top = "0px";
     draggedElement.style.position = "relative";
   }
 
   draggedElement.style.pointerEvents = "auto";
-
   draggedElement = null;
   draggedShape = null;
+  isDragging = false;
 
   clearHighlights();
 
   document.removeEventListener("mousemove", dragMove);
   document.removeEventListener("mouseup", dragEnd);
-
   document.removeEventListener("touchmove", dragMove);
   document.removeEventListener("touchend", dragEnd);
 }
 
-// ---------------- Platzierung ----------------
+// ---- PLATZIERLOGIK ----
+function highlightPossiblePlacement(clientX, clientY) {
+  clearHighlights();
+
+  const cell = document.elementFromPoint(clientX, clientY);
+  if (!cell || !cell.classList.contains("cell")) return;
+
+  const r = parseInt(cell.dataset.row);
+  const c = parseInt(cell.dataset.col);
+
+  if (!canPlace(draggedShape, r, c)) return;
+
+  draggedShape.forEach((row, y) => {
+    row.forEach((cell, x) => {
+      if (cell === 1) {
+        const index = (r + y) * 9 + (c + x);
+        const cellEl = boardEl.children[index];
+        cellEl.classList.add("highlight");
+      }
+    });
+  });
+}
+
+function clearHighlights() {
+  document.querySelectorAll(".highlight").forEach(e => e.classList.remove("highlight"));
+}
 
 function tryPlaceAt(clientX, clientY) {
   const cell = document.elementFromPoint(clientX, clientY);
@@ -157,7 +230,6 @@ function tryPlaceAt(clientX, clientY) {
 
   if (!canPlace(draggedShape, r, c)) return false;
 
-  // setzen
   draggedShape.forEach((row, y) => {
     row.forEach((cell, x) => {
       if (cell === 1) board[r + y][c + x] = 1;
@@ -167,13 +239,29 @@ function tryPlaceAt(clientX, clientY) {
   score += draggedShape.flat().filter(v => v === 1).length;
   scoreEl.textContent = score;
 
+  if (score > highscore) {
+    highscore = score;
+    localStorage.setItem("highscore", highscore);
+    highscoreEl.textContent = highscore;
+  }
+
+  // Challenge check
+  if (!challengeDoneToday && score >= challengeGoal) {
+    challengeDoneToday = true;
+    localStorage.setItem("challengeDone", new Date().toDateString());
+    coins += 50;
+    coinsEl.textContent = coins;
+    localStorage.setItem("coins", coins);
+    challengeStatus.textContent = "✔ Erledigt! +50 Coins";
+  }
+
   draggedElement.remove();
   renderBoard();
   clearLines();
 
   if (piecesEl.children.length === 0) generatePieces();
-  checkGameOver();
 
+  checkGameOver();
   return true;
 }
 
@@ -189,38 +277,7 @@ function canPlace(shape, r, c) {
   return true;
 }
 
-// ---------------- Highlights ----------------
-
-function highlightPossiblePlacement(x, y) {
-  clearHighlights();
-
-  const cell = document.elementFromPoint(x, y);
-  if (!cell || !cell.classList.contains("cell")) return;
-
-  const r = parseInt(cell.dataset.row);
-  const c = parseInt(cell.dataset.col);
-
-  if (!draggedShape) return;
-
-  if (!canPlace(draggedShape, r, c)) return;
-
-  draggedShape.forEach((row, y2) => {
-    row.forEach((cell2, x2) => {
-      if (cell2 === 1) {
-        const index = (r + y2) * 9 + (c + x2);
-        const cellEl = boardEl.children[index];
-        cellEl.classList.add("highlight");
-      }
-    });
-  });
-}
-
-function clearHighlights() {
-  document.querySelectorAll(".highlight").forEach(e => e.classList.remove("highlight"));
-}
-
-// ---------------- Clearing ----------------
-
+// ---- LINIEN LÖSCHEN ----
 function clearLines() {
   let removed = 0;
 
@@ -240,10 +297,11 @@ function clearLines() {
     }
   }
 
-  // 3×3 Bereiche
+  // 3×3
   for (let br = 0; br < 9; br += 3) {
     for (let bc = 0; bc < 9; bc += 3) {
       let full = true;
+
       for (let r = 0; r < 3; r++)
         for (let c = 0; c < 3; c++)
           if (board[br + r][bc + c] === 0) full = false;
@@ -264,8 +322,7 @@ function clearLines() {
   }
 }
 
-// ---------------- Game Over ----------------
-
+// ---- GAME OVER ----
 function checkGameOver() {
   const shapes = [...piecesEl.children].map(p => p.shape);
 
@@ -280,13 +337,35 @@ function checkGameOver() {
   alert("Game Over!\nScore: " + score);
 }
 
-// Restart
-restartBtn.addEventListener("click", () => {
+// ---- JOKER ----
+document.getElementById("jokerNew").onclick = () => {
+  if (coins < 20) return alert("Zu wenig Coins!");
+  coins -= 20;
+  coinsEl.textContent = coins;
+  localStorage.setItem("coins", coins);
+  generatePieces();
+};
+
+document.getElementById("jokerBomb").onclick = () => {
+  if (coins < 50) return alert("Zu wenig Coins!");
+  coins -= 50;
+  coinsEl.textContent = coins;
+  localStorage.setItem("coins", coins);
+
+  for (let r = 0; r < 3; r++)
+    for (let c = 0; c < 3; c++)
+      board[r][c] = 0;
+
+  renderBoard();
+};
+
+// ---- Restart ----
+document.getElementById("restartBtn").onclick = () => {
   score = 0;
   scoreEl.textContent = 0;
   initBoard();
   generatePieces();
-});
+};
 
 // Start
 initBoard();
