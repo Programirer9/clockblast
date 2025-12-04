@@ -1,75 +1,43 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Block Blast Neo — Deluxe</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BlockBlast</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Ladebildschirm -->
-  <div id="loadingScreen">
-    <div class="loader"></div>
-    <p>BlockBlast wird geladen...</p>
-  </div>
-
-  <header class="topbar">
-    <h1>Block Blast Neo</h1>
-    <div class="score-panel">
-      <div>Punkte: <span id="score">0</span></div>
-      <div>Highscore: <span id="highscore">0</span></div>
-    </div>
-  </header>
-
-  <main class="game">
-    <div class="left-col">
-      <div id="board" class="board"></div>
-      <canvas id="particles" class="particles"></canvas>
+  <main>
+    <h1>BlockBlast</h1>
+    <div id="hud">
+      <div id="score">Score: 0</div>
+      <div id="lives">Lives: 3</div>
+      <div id="level">Level: 1</div>
     </div>
 
-    <aside class="sidebar">
-      <h2>Bausteine</h2>
-      <div id="pieces" class="pieces"></div>
+    <canvas id="gameCanvas" width="800" height="600" aria-label="BlockBlast Spiel"></canvas>
 
-      <div class="controls">
-        <button id="swapBtn">Neue 3 Bausteine</button>
-        <button id="restartBtn" class="danger">Neustart</button>
+    <div id="controls">
+      <button id="startBtn">Start / Restart</button>
+      <button id="pauseBtn">Pause</button>
+      <label for="volume">Sound</label>
+      <input id="volume" type="range" min="0" max="1" step="0.1" value="0.5" />
+      <span class="hint">Links/Rechts: ⬅️ ➡️  •  Taste P: Pause • Leertaste: Abprallen (Start)</span>
+    </div>
+
+    <div id="overlay" class="hidden">
+      <div id="overlayContent">
+        <h2 id="overlayTitle">BlockBlast</h2>
+        <p id="overlayMsg">Drücke Start</p>
+        <button id="overlayBtn">Weiter</button>
       </div>
-
-      <div class="extras">
-        <h3>Daily Challenge</h3>
-        <div id="challengeInfo" class="challenge"></div>
-        <button id="claimChallenge" class="small">Challenge prüfen</button>
-        <div id="challengeStatus" class="hint"></div>
-
-        <h3>Themes & Skins</h3>
-        <select id="themeSelect" aria-label="Theme wählen">
-          <option value="neon">Neon (Default)</option>
-          <option value="dark">Dunkel</option>
-          <option value="retro">Retro</option>
-          <option value="pastel">Pastel</option>
-        </select>
-        <div class="theme-row">
-          <label><input type="checkbox" id="toggleParticles" checked> Partikel</label>
-        </div>
-
-        <h3>Audio</h3>
-        <label><input type="checkbox" id="toggleSound" checked> Soundeffekte</label>
-        <label><input type="checkbox" id="toggleMusic"> Leichte Hintergrundmusik</label>
-      </div>
-
-      <p id="hint" class="hint"></p>
-    </aside>
+    </div>
   </main>
 
-  <div id="overlay" class="overlay hidden">
-    <div class="overlay-inner">
-      <h2>Game Over</h2>
-      <p id="finalScore">Score:</p>
-      <button id="tryAgain" class="danger">Nochmal</button>
-    </div>
-  </div>
+  <footer>
+    <small>Made with ❤️ — pack es auf GitHub Pages: branch <code>main</code>, Settings → Pages → Deploy</small>
+  </footer>
 
-  <script src="script.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
