@@ -1,30 +1,22 @@
-# BlockBlast
+# BlockBlast — Enhanced
 
-Ein kleines Browser-Block-Breakout-Spiel (Vanilla JS + Canvas). Fertig zum Hochladen auf GitHub und Veröffentlichen via GitHub Pages.
-
-**Features**
-- Paddle, Ball, mehrere Brick-Reihen
-- Level-Fortschritt (mehr Reihen pro Level)
-- Score, Lives, HUD
-- Pause / Restart
-- Responsive Canvas (skaliert zur Breite)
-- Keine externen Abhängigkeiten — läuft überall (Chrome, Firefox, Edge)
+Dieses Repo enthält eine erweiterte Web-Version von BlockBlast:
+- 9×9 Grid, 3 Blöcke pro Runde
+- Highscores (localStorage)
+- Münzen & Shop (Joker kaufen)
+- Joker entfernt eine belegte Zelle
+- Tägliche Challenges mit Tages-Belohnung
+- Mobile-optimiert + Animationen
 
 ## Dateien
-- `index.html` — Spielseite
-- `style.css` — Styling
-- `game.js` — Spiel-Logik
+- `index.html` — Oberfläche & Modals
+- `style.css` — Responsives Styling + Animationen
+- `game.js` — komplette Logik & localStorage
 - `README.md` — dieses File
 
-## Deployment (GitHub Pages)
-1. Erstelle ein neues Repository (z. B. `blockblast`).
-2. Füge die Dateien (`index.html`, `style.css`, `game.js`, `README.md`) in den `main` Branch.
-3. In GitHub: `Settings` → `Pages` → wähle Branch `main` und root `/` → Save.
-4. Nach kurzer Zeit ist die Seite verfügbar unter `https://<dein-username>.github.io/<repo-name>/`.
+## Hinweise
+- Speichert Daten im `localStorage` (Highscores, Münzen, Joker, Claim-Status für Challenges).
+- Anpassungen: Jokerpreis, tägliche Belohnung und Shapes sind in `game.js` leicht änderbar.
 
-## Lokales Testen
-Öffne `index.html` im Browser (lokales File funktioniert), oder starte einen kleinen HTTP-Server:
-```bash
-# mit Python 3
-python -m http.server 8000
-# dann öffnen: http://localhost:8000
+## Deployment
+Wie gehabt: auf GitHub hochladen → Settings → Pages → main → root → Deploy.
